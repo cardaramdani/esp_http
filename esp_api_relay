@@ -1,0 +1,189 @@
+#include <WiFi.h>
+#include "time.h"
+#include "wifi.h"
+#include <HTTPClient.h>
+
+const char* relay1 = "https://citraliving.engineeringlife.id/api/esp/1";
+const char* relay2 = "https://citraliving.engineeringlife.id/api/esp/2";
+const char* relay3 = "https://citraliving.engineeringlife.id/api/esp/3";
+const char* relay4 = "https://citraliving.engineeringlife.id/api/esp/4";
+int lampu1 = 25;
+int lampu2 = 33;
+int lampu3 = 14;
+int lampu4 = 27;
+
+String httpCode;
+String Off = "Off";
+String On = "On";
+
+const char* ssidw = "nama wifi";        // your network SSID (name)
+const char* passw = "passord wifi";    // your network password (use for WPA, or use as key for WEP)
+
+//const char* SN = "https://citraliving.engineeringlife.id/api/esp";
+//String apiKeyValue = "Bearer key auth";
+const char* ntpServer = "id.pool.ntp.org";
+const long  gmtOffset_sec = 21600;
+const int   daylightOffset_sec = 3600;
+
+unsigned long hitungan_milis;
+unsigned long milis_sekarang;
+const unsigned long detik = 1000;
+
+//sensor dallas
+#include <OneWire.h>
+#include <DallasTemperature.h>
+#define ONE_WIRE_BUS 26
+OneWire oneWire(ONE_WIRE_BUS);
+DallasTemperature sensordallas(&oneWire);
+int Celcius = 0;
+float suhuSekarang;
+
+void printLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return;
+  }
+  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+}
+
+void setup()
+{
+  pinMode(lampu1,OUTPUT);
+  pinMode(lampu2,OUTPUT);
+  pinMode(lampu3,OUTPUT);
+  pinMode(lampu4,OUTPUT);
+  digitalWrite(lampu1, LOW);
+  digitalWrite(lampu2, LOW);
+  digitalWrite(lampu3, LOW);
+  digitalWrite(lampu4, LOW);
+  hitungan_milis = 0;
+  sensordallas.begin();
+  Serial.begin(115200);
+  
+  //connect to WiFi
+  Serial.printf("Connecting to %s ", ssidw);
+  WiFi.begin(ssidw, passw);
+  while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.print(".");
+     
+  }
+  Serial.println(" wifi CONNECTED coy");
+  
+  //init and get the time
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  printLocalTime();
+
+  //disconnect WiFi as it's no longer needed
+  //WiFi.disconnect(btrue);
+  //WiFi.mode(WIFI_OFF);
+}
+
+
+float ambilSuhu()
+{
+   sensordallas.requestTemperatures();
+   float suhu = sensordallas.getTempCByIndex(0);
+   return suhu;   
+}
+
+void loop()
+{
+  //Check WiFi connection status
+  if(WiFi.status()== WL_CONNECTED){
+    {
+    HTTPClient http1;
+    // Your Domain name with URL path or IP address with path
+    http1.begin(relay1);
+    //HEADER FORMAT
+//    http1.addHeader("Accept", "application/json");
+//    http1.addHeader("Authorization", apiKeyValue);
+    http1.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    Serial.print("metode: ");
+    Serial.println("HTTP_GET");
+    int Response1 = http1.GET();
+    Serial.print("Response1 : "); Serial.println(Response1);
+    String R1 = http1.getString();
+    Serial.print("Status lampu1: "); Serial.println(R1);
+    
+    if(Off == R1){digitalWrite(lampu1, LOW);}    
+    if(On == R1)  {digitalWrite(lampu1, HIGH);}
+    Serial.println("");
+
+    HTTPClient http2;
+    // Your Domain name with URL path or IP address with path
+    http2.begin(relay2);
+    //HEADER FORMAT
+//    http2.addHeader("Accept", "application/json");
+//    http2.addHeader("Authorization", apiKeyValue);
+    http2.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    Serial.print("metode: ");
+    Serial.println("HTTP_GET");
+    int Response2 = http2.GET();
+    Serial.print("Response2: ");
+    Serial.println(Response2);
+    String R2 = http2.getString();
+    Serial.print("Status lampu2: ");
+    Serial.println(R2);
+    if(Off == R2){digitalWrite(lampu2, LOW);}
+     if(On == R2){digitalWrite(lampu2, HIGH);}
+    Serial.println("");
+//
+    HTTPClient http3;
+    // Your Domain name with URL path or IP address with path
+    http3.begin(relay3);
+    //HEADER FORMAT
+//    http3.addHeader("Accept", "application/json");
+//    http3.addHeader("Authorization", apiKeyValue);
+    http3.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    Serial.print("metode: ");
+    Serial.println("HTTP_GET");
+    int Response3 = http3.GET();
+    Serial.print("Response3: ");
+    Serial.println(Response3);
+    String R3 = http3.getString();
+    Serial.print("Status lampu3: ");
+    Serial.println(R3);
+    if(Off == R3){digitalWrite(lampu3, LOW);}
+    if(On == R3){digitalWrite(lampu3, HIGH);}
+    Serial.println("");
+//    
+    HTTPClient http4;
+    // Your Domain name with URL path or IP address with path
+    http4.begin(relay4);
+    //HEADER FORMAT
+//    http4.addHeader("Accept", "application/json");
+//    http4.addHeader("Authorization", apiKeyValue);
+    http4.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    Serial.print("metode: ");
+    Serial.println("HTTP_GET");
+    //Serial.println(httpCode);
+    int Response4 = http4.GET();
+    Serial.print("Response4: ");
+    Serial.println(Response4);
+    String R4 = http4.getString();
+    Serial.print("Status lampu4: ");
+    Serial.println(R4);
+    if(Off == R4){digitalWrite(lampu4, LOW);}
+    if(On == R4){digitalWrite(lampu4, HIGH);}
+    Serial.println("");
+    http1.end();
+    http2.end();
+    http3.end();
+    http4.end();
+}
+    }
+    else {
+    Serial.println("WiFi Disconnected");
+    delay(2000);
+    ESP.restart();}
+    suhuSekarang = ambilSuhu();
+    //test untuk pompa besok harus di hapus
+//    if(ambilSuhu() <= 40){digitalWrite(lampu1, LOW);}
+//    if(ambilSuhu() >= 40){digitalWrite(lampu1, HIGH);}
+    Serial.print("Temperature: ");
+    Serial.println(suhuSekarang);     
+    Serial.println("");
+}
