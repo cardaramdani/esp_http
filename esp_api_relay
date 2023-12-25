@@ -1,6 +1,6 @@
-#include <WiFi.h>
-#include "time.h"
-#include "wifi.h"
+//#include <WiFi.h>
+//#include "time.h"
+//#include "wifi.h"
 #include <HTTPClient.h>
 
 const char* relay1 = "https://citraliving.engineeringlife.id/api/esp/1";
@@ -16,11 +16,11 @@ String httpCode;
 String Off = "Off";
 String On = "On";
 
-const char* ssidw = "nama wifi";        // your network SSID (name)
-const char* passw = "passord wifi";    // your network password (use for WPA, or use as key for WEP)
+const char* ssidw = "Engineering";        // your network SSID (name)
+const char* passw = "engineeringlife0613";    // your network password (use for WPA, or use as key for WEP)
 
 //const char* SN = "https://citraliving.engineeringlife.id/api/esp";
-//String apiKeyValue = "Bearer key auth";
+//String apiKeyValue = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiYmI4YzQ5Y2VlYzM0MzhkNzliZDk4MTA1ZTlmMDg5YTVkNjI4Yzc4MjI2YTllNGQ2YTEwOTE4OTVlODY5ODk3NDFhMTkyMWRiMGMyYTBmOGIiLCJpYXQiOjE1OTc1OTc5MjMsIm5iZiI6MTU5NzU5NzkyMywiZXhwIjoxNjI5MTMzOTIzLCJzdWIiOiI1MSIsInNjb3BlcyI6W119.u6SqW7n7LHqeiWhrU2QVtdSnxOMRWWiBX6VkuztZBzsyOxxKCT7CzvBXG3YwXw99VE705ciya3DpKvLXXhqvlv1L3u8CUKYLoFfJS3mrP-kX0Ve_E5EpiYLlq254EuYANijnjZ0JGv0gPdyXRSeNhUTARAtIR1D2P7s7VUUvvFYDtBkq9cC9yqA82svXbuERwHFFgphpAOP3uvoZfJmlZ8-Xw_sgeyrrA2TKAByx6nzwtvSgvIHr7MqTKl-OEe8McASo_du1l0znwI_qLWJBpxXW8erKHo2bt7hNpkh3mD2wHZDlV4aC3wACeEdTA7GtxAleCY4gRGcjiiXSck8Zc3_kp-sEIqMyN4bRW9Ol_hYLvrKqzN-tzm9I1rypsXabGrYRVKBFSHwhL5rknCG4gNOnG5O7I-P0lo2oqpEpYGhfF5r-gWk-ZGXXX8NuJVSRJJ5u3SFoSVaJ3gHoEsZf8aODRS6Hq4WyNSaBR0TircgIQ4PpsQxbvcGo59pbE4HG5NYmastzSWLTx85d2WWhZqpYP1VqOFwaCvXWZsGcrEOHqD-1gMYARrBmtygE8ePHx3URUyux-oPYs1LkltdGVZfFvglXbeuyleXot1plrbLTAoohotpxcEK2jvQk5E4JKSFriagnthAhTwrCRyZxKqe0YD5tvItLxzaLhvpxc7U";
 const char* ntpServer = "id.pool.ntp.org";
 const long  gmtOffset_sec = 21600;
 const int   daylightOffset_sec = 3600;
@@ -103,15 +103,20 @@ void loop()
     http1.addHeader("Content-Type", "application/x-www-form-urlencoded");
     Serial.print("metode: ");
     Serial.println("HTTP_GET");
+    
     int Response1 = http1.GET();
-    Serial.print("Response1 : "); Serial.println(Response1);
+    if (Response1 != 200) {
+       Serial.printf("HTTP request 1 failed, error: %s\n", "terjadi kesalahan");
+    } else {
+      Serial.print("Response1 : "); Serial.println(Response1);
     String R1 = http1.getString();
     Serial.print("Status lampu1: "); Serial.println(R1);
     
     if(Off == R1){digitalWrite(lampu1, LOW);}    
     if(On == R1)  {digitalWrite(lampu1, HIGH);}
     Serial.println("");
-
+    }
+  
     HTTPClient http2;
     // Your Domain name with URL path or IP address with path
     http2.begin(relay2);
@@ -122,14 +127,17 @@ void loop()
     Serial.print("metode: ");
     Serial.println("HTTP_GET");
     int Response2 = http2.GET();
-    Serial.print("Response2: ");
-    Serial.println(Response2);
+     if (Response2 != 200) {
+       Serial.printf("HTTP request 2 failed, error: %s\n", "terjadi kesalahan");
+    } else {
+      Serial.print("Response2 : "); Serial.println(Response2);
     String R2 = http2.getString();
-    Serial.print("Status lampu2: ");
-    Serial.println(R2);
-    if(Off == R2){digitalWrite(lampu2, LOW);}
-     if(On == R2){digitalWrite(lampu2, HIGH);}
+    Serial.print("Status lampu2: "); Serial.println(R2);
+    
+    if(Off == R2){digitalWrite(lampu2, LOW);}    
+    if(On == R2)  {digitalWrite(lampu2, HIGH);}
     Serial.println("");
+    }
 //
     HTTPClient http3;
     // Your Domain name with URL path or IP address with path
@@ -141,14 +149,17 @@ void loop()
     Serial.print("metode: ");
     Serial.println("HTTP_GET");
     int Response3 = http3.GET();
-    Serial.print("Response3: ");
-    Serial.println(Response3);
+     if (Response2 != 200) {
+       Serial.printf("HTTP request 3 failed, error: %s\n", "terjadi kesalahan");
+    } else {
+      Serial.print("Response3 : "); Serial.println(Response3);
     String R3 = http3.getString();
-    Serial.print("Status lampu3: ");
-    Serial.println(R3);
-    if(Off == R3){digitalWrite(lampu3, LOW);}
-    if(On == R3){digitalWrite(lampu3, HIGH);}
+    Serial.print("Status lampu3: "); Serial.println(R3);
+    
+    if(Off == R3){digitalWrite(lampu3, LOW);}    
+    if(On == R3)  {digitalWrite(lampu3, HIGH);}
     Serial.println("");
+    }
 //    
     HTTPClient http4;
     // Your Domain name with URL path or IP address with path
@@ -161,14 +172,18 @@ void loop()
     Serial.println("HTTP_GET");
     //Serial.println(httpCode);
     int Response4 = http4.GET();
-    Serial.print("Response4: ");
-    Serial.println(Response4);
+     if (Response4 != 200) {
+       Serial.printf("HTTP request 4 failed, error: %s\n", "terjadi kesalahan");
+    } else {
+      Serial.print("Response4 : "); Serial.println(Response4);
     String R4 = http4.getString();
-    Serial.print("Status lampu4: ");
-    Serial.println(R4);
-    if(Off == R4){digitalWrite(lampu4, LOW);}
-    if(On == R4){digitalWrite(lampu4, HIGH);}
+    Serial.print("Status lampu4: "); Serial.println(R4);
+    
+    if(Off == R4){digitalWrite(lampu4, LOW);}    
+    if(On == R4)  {digitalWrite(lampu4, HIGH);}
     Serial.println("");
+    }
+    
     http1.end();
     http2.end();
     http3.end();
